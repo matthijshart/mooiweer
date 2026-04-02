@@ -19,10 +19,10 @@
     .header-inner { max-width: 560px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
     .logo { font-size: 13px; font-weight: 600; color: #2563eb; white-space: nowrap; transition: color 0.4s; }
     body.vakantie .logo { color: #f97316; }
-    .search-wrap { flex: 1; position: relative; }
-    .lei { position: absolute; left: 0; right: 0; text-align: center; font-size: 15px; line-height: 1; pointer-events: none; z-index: 2; }
-    .lei-top { top: -14px; }
-    .lei-bottom { bottom: -14px; }
+    .search-wrap { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .search-input-row { position: relative; }
+    .lei { text-align: center; font-size: 13px; line-height: 1.1; pointer-events: none; letter-spacing: -1px; display: none; }
+    body.vakantie .lei { display: block; }
     input[type=text] { width: 100%; padding: 9px 12px 9px 36px; border-radius: 12px; border: none; background: #eff6ff; font-size: 14px; color: #1e293b; outline: none; transition: background 0.3s, box-shadow 0.2s; }
     body.vakantie input[type=text] { background: #fef3c7; }
     input[type=text]:focus { box-shadow: 0 0 0 2px #93c5fd; background: #fff; }
@@ -71,7 +71,8 @@
     .day { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 14px; border-left: 1px solid #f1f5f9; }
     body.vakantie .day { border-color: #fed7aa; }
     .day:first-child { padding-left: 0; border-left: none; }
-    .day-name { font-size: 11px; color: #94a3b8; }
+    .day-name { font-size: 11px; font-weight: 600; color: #475569; }
+    .day-date { font-size: 10px; color: #cbd5e1; }
     .day-temps { display: flex; flex-direction: column; align-items: center; gap: 1px; }
     .day-max { font-size: 13px; font-weight: 600; color: #1e293b; }
     .day-min { font-size: 11px; color: #94a3b8; }
@@ -128,10 +129,14 @@
   <div class="header-inner">
     <span class="logo">demooiweerapp</span>
     <div class="search-wrap" id="searchWrap">
-      <svg class="search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-      <input type="text" id="searchInput" placeholder="Zoek een stad..." autocomplete="off" />
-      <div class="search-spinner" id="searchSpinner"></div>
-      <div class="autocomplete" id="autocomplete" style="display:none"></div>
+      <div class="lei">🌸🌺🌼🌻🌺🌸🌼🌺🌸🌼🌻🌺🌸</div>
+      <div class="search-input-row">
+        <svg class="search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" id="searchInput" placeholder="Zoek een stad..." autocomplete="off" />
+        <div class="search-spinner" id="searchSpinner"></div>
+        <div class="autocomplete" id="autocomplete" style="display:none"></div>
+      </div>
+      <div class="lei">🌺🌼🌸🌻🌺🌼🌸🌺🌻🌼🌸🌺🌼</div>
     </div>
     <button class="vak-btn" id="vakBtn" onclick="toggleVakantie()">🏖️ Vakantie</button>
   </div>
@@ -170,7 +175,7 @@
 
     <!-- 7-day forecast -->
     <div class="section">
-      <div class="section-label">7-daagse verwachting</div>
+      <div class="section-label">14-daagse verwachting</div>
       <div class="forecast-scroll"><div class="forecast-row" id="forecastRow"></div></div>
     </div>
 
@@ -299,7 +304,7 @@ async function fetchWeather(lat, lon, name, country){
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
     + `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,uv_index,surface_pressure,visibility,is_day`
     + `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,uv_index_max,sunrise,sunset,sunshine_duration`
-    + `&timezone=Europe/Amsterdam&forecast_days=7`;
+    + `&timezone=Europe/Amsterdam&forecast_days=14`;
   const controller = new AbortController();
   const timer = setTimeout(()=>controller.abort(), 8000);
   const res = await fetch(url, {signal: controller.signal});
@@ -350,17 +355,20 @@ function render(raw){
 
   // Forecast
   const daily = data.daily;
-  document.getElementById('forecastRow').innerHTML = daily.time.map((t,i)=>`
-    <div class="day">
+  document.getElementById('forecastRow').innerHTML = daily.time.map((t,i)=>{
+    const d=new Date(t+'T12:00:00');
+    const dateStr=d.toLocaleDateString('nl-NL',{day:'numeric',month:'short'});
+    return `<div class="day">
       <div class="day-name">${fmtDay(t,true)}</div>
+      <div class="day-date">${dateStr}</div>
       ${icon(wc(daily.weather_code[i]).icon, 28)}
       <div class="day-temps">
         <div class="day-max">${Math.round(daily.temperature_2m_max[i])}°</div>
         <div class="day-min">${Math.round(daily.temperature_2m_min[i])}°</div>
       </div>
       <div class="day-rain">${daily.precipitation_probability_max[i]}%</div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 
   // Details
   const d0 = {
@@ -418,15 +426,7 @@ function toggleVakantie(){
   document.body.classList.toggle('vakantie', vakantieMode);
   document.getElementById('vakBtn').textContent = vakantieMode ? '🌴 Vakantie!' : '🏖️ Vakantie';
   document.getElementById('vakTagline').style.display = vakantieMode ? 'block' : 'none';
-  // Lei decoration
-  const wrap = document.getElementById('searchWrap');
-  const old = wrap.querySelectorAll('.lei');
-  old.forEach(e=>e.remove());
-  if(vakantieMode){
-    const top=document.createElement('div'); top.className='lei lei-top'; top.textContent='🌸🌺🌼🌻🌺🌸🌼🌺🌸🌼🌻🌺🌸';
-    const bot=document.createElement('div'); bot.className='lei lei-bottom'; bot.textContent='🌺🌼🌸🌻🌺🌼🌸🌺🌻🌼🌸🌺🌼';
-    wrap.appendChild(top); wrap.appendChild(bot);
-  }
+  // Lei decoration handled via CSS body.vakantie .lei
   if(currentWeather) render(currentWeather);
 }
 
