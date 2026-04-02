@@ -506,7 +506,16 @@ function selectLocation(lat,lon,name,country,displayName){
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-fetchWeather(52.3676,4.9041,'Amsterdam','Nederland').then(render);
+function showError(msg){
+  document.getElementById('loader').innerHTML = `<div style="text-align:center;color:#94a3b8;font-size:14px;padding:40px 20px">${msg}<br><br><button onclick="init()" style="margin-top:8px;padding:8px 16px;border-radius:10px;border:none;background:#eff6ff;color:#3b82f6;font-size:13px;cursor:pointer">Opnieuw proberen</button></div>`;
+}
+function init(){
+  document.getElementById('loader').innerHTML='<div class="loader-circle"></div>';
+  document.getElementById('loader').style.display='flex';
+  document.getElementById('app').style.display='none';
+  fetchWeather(52.3676,4.9041,'Amsterdam','Nederland').then(render).catch(()=>showError('Kon het weer niet ophalen. Controleer je verbinding.'));
+}
+init();
 </script>
 </body>
 </html>
