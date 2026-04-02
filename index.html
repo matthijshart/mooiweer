@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="demooiweerapp" />
+  <title>demooiweerapp — Het weer, maar dan mooier</title>
+  <meta name="description" content="Het weer, maar dan mooier. Altijd een beetje beter dan je denkt!" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fff; color: #111; min-height: 100svh; transition: background 0.4s; }
+    body.vakantie { background: linear-gradient(180deg, #fffbeb, #fff7ed, #fefce8); }
+
+    /* Header */
+    header { position: sticky; top: 0; z-index: 40; border-bottom: 1px solid #dbeafe; background: rgba(255,255,255,0.92); backdrop-filter: blur(12px); transition: border-color 0.4s, background 0.4s; }
+    body.vakantie header { border-color: #fed7aa; background: rgba(255,251,235,0.92); }
+    .header-inner { max-width: 560px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+    .logo { font-size: 13px; font-weight: 600; color: #2563eb; white-space: nowrap; transition: color 0.4s; }
+    body.vakantie .logo { color: #f97316; }
+    .search-wrap { flex: 1; position: relative; }
+    .lei { position: absolute; left: 0; right: 0; text-align: center; font-size: 15px; line-height: 1; pointer-events: none; z-index: 2; }
+    .lei-top { top: -14px; }
+    .lei-bottom { bottom: -14px; }
+    input[type=text] { width: 100%; padding: 9px 12px 9px 36px; border-radius: 12px; border: none; background: #eff6ff; font-size: 14px; color: #1e293b; outline: none; transition: background 0.3s, box-shadow 0.2s; }
+    body.vakantie input[type=text] { background: #fef3c7; }
+    input[type=text]:focus { box-shadow: 0 0 0 2px #93c5fd; background: #fff; }
+    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 16px; height: 16px; pointer-events: none; }
+    .search-spinner { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border: 2px solid #93c5fd; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+    .autocomplete { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); border: 1px solid #f1f5f9; overflow: hidden; z-index: 50; }
+    .autocomplete button { display: block; width: 100%; text-align: left; padding: 10px 14px; font-size: 13px; color: #334155; background: none; border: none; cursor: pointer; }
+    .autocomplete button:hover { background: #f8fafc; }
+    .vak-btn { font-size: 12px; font-weight: 600; padding: 7px 12px; border-radius: 20px; border: none; cursor: pointer; background: #f1f5f9; color: #64748b; white-space: nowrap; transition: all 0.3s; }
+    body.vakantie .vak-btn { background: #f97316; color: #fff; box-shadow: 0 4px 12px rgba(249,115,22,0.3); }
+    .vak-tagline { text-align: center; font-size: 11px; color: #fb923c; padding: 2px 0 6px; max-width: 560px; margin: 0 auto; }
+
+    /* Main */
+    main { max-width: 560px; margin: 0 auto; padding: 0 16px; }
+
+    /* Hero */
+    .hero { padding: 32px 0 24px; }
+    .hero-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .hero-city { font-size: 22px; font-weight: 600; color: #0f172a; }
+    body.vakantie .hero-city { color: #ea580c; }
+    .hero-date { font-size: 13px; color: #94a3b8; margin-top: 2px; }
+    body.vakantie .hero-date { color: #fb923c; }
+    .share-btn { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #3b82f6; background: none; border: none; cursor: pointer; padding: 4px 0; }
+    body.vakantie .share-btn { color: #f97316; }
+    .temp-row { display: flex; align-items: flex-end; gap: 16px; }
+    .temp-big { font-size: 80px; font-weight: 100; line-height: 1; letter-spacing: -3px; color: #1e3a5f; transition: color 0.4s; }
+    body.vakantie .temp-big { color: #ea580c; }
+    .weather-desc { margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 15px; color: #475569; }
+    body.vakantie .weather-desc { color: #c2410c; }
+    .feels { font-size: 13px; color: #94a3b8; }
+    body.vakantie .feels { color: #fb923c; }
+    .stats { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: #64748b; transition: color 0.4s; }
+    body.vakantie .stats { color: #f97316; }
+    .stat { display: flex; align-items: center; gap: 5px; }
+
+    /* Divider */
+    hr { border: none; border-top: 1px solid #f1f5f9; margin: 0; }
+    body.vakantie hr { border-color: #fed7aa; }
+
+    /* Forecast */
+    .section { padding: 24px 0; }
+    .section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #60a5fa; margin-bottom: 12px; }
+    body.vakantie .section-label { color: #fb923c; }
+    .forecast-scroll { overflow-x: auto; margin: 0 -16px; padding: 0 16px; }
+    .forecast-row { display: flex; min-width: max-content; }
+    .day { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 14px; border-left: 1px solid #f1f5f9; }
+    body.vakantie .day { border-color: #fed7aa; }
+    .day:first-child { padding-left: 0; border-left: none; }
+    .day-name { font-size: 11px; color: #94a3b8; }
+    .day-temps { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+    .day-max { font-size: 13px; font-weight: 600; color: #1e293b; }
+    .day-min { font-size: 11px; color: #94a3b8; }
+    .day-rain { font-size: 10px; color: #cbd5e1; }
+
+    /* Details */
+    .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid #f8fafc; font-size: 13px; }
+    body.vakantie .detail-row { border-color: #fed7aa22; }
+    .detail-label { color: #94a3b8; }
+    .detail-value { font-weight: 500; color: #334155; }
+
+    /* Vakantie CTA */
+    .vak-cta { text-align: center; padding: 20px 0 8px; }
+    .vak-cta p { font-size: 13px; color: #f97316; margin-bottom: 12px; }
+    .send-btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; background: #f97316; color: #fff; border: none; border-radius: 16px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 6px 20px rgba(249,115,22,0.35); transition: transform 0.1s, box-shadow 0.1s; }
+    .send-btn:active { transform: scale(0.97); }
+
+    /* Compare */
+    .compare-toggle { font-size: 11px; color: #93c5fd; background: none; border: none; cursor: pointer; }
+    .compare-toggle:hover { color: #3b82f6; }
+    .compare-chart { margin-top: 14px; }
+    .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 11px; }
+    .bar-label { width: 24px; color: #94a3b8; }
+    .bar-wrap { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+    .bar { height: 5px; border-radius: 9px; }
+    .bar-us { background: #3b82f6; }
+    .bar-them { background: #e2e8f0; }
+    .bar-pct { color: #64748b; width: 30px; }
+    .bar-pct-them { color: #cbd5e1; }
+    .compare-note { font-size: 10px; color: #cbd5e1; font-style: italic; margin-top: 8px; }
+
+    /* Counter */
+    .counter { font-size: 12px; color: #cbd5e1; margin-top: 16px; padding-bottom: 24px; }
+    .counter span { color: #64748b; font-weight: 600; }
+
+    /* Footer */
+    footer { border-top: 1px solid #f1f5f9; }
+    body.vakantie footer { border-color: #fed7aa; }
+    .footer-inner { max-width: 560px; margin: 0 auto; padding: 14px 16px; font-size: 11px; color: #cbd5e1; }
+
+    /* Spinner / loading */
+    .loader { display: flex; justify-content: center; padding: 80px 0; }
+    .loader-circle { width: 24px; height: 24px; border: 2px solid #e2e8f0; border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* SVG icons inline */
+    svg { flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <span class="logo">demooiweerapp</span>
+    <div class="search-wrap" id="searchWrap">
+      <svg class="search-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input type="text" id="searchInput" placeholder="Zoek een stad..." autocomplete="off" />
+      <div class="search-spinner" id="searchSpinner"></div>
+      <div class="autocomplete" id="autocomplete" style="display:none"></div>
+    </div>
+    <button class="vak-btn" id="vakBtn" onclick="toggleVakantie()">🏖️ Vakantie</button>
+  </div>
+  <div class="vak-tagline" id="vakTagline" style="display:none">🌊 Geniet van je vakantie! 🍹 Altijd zon, altijd warm 🌴</div>
+</header>
+
+<main>
+  <div id="loader" class="loader"><div class="loader-circle"></div></div>
+  <div id="app" style="display:none">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-top">
+        <div>
+          <div class="hero-city" id="heroCity"></div>
+          <div class="hero-date" id="heroDate"></div>
+        </div>
+        <button class="share-btn" onclick="shareWeather()">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          <span id="shareLabel">Delen</span>
+        </button>
+      </div>
+      <div class="temp-row">
+        <div class="temp-big" id="tempBig"></div>
+        <div id="heroIcon" style="padding-bottom:8px"></div>
+      </div>
+      <div class="weather-desc">
+        <span id="weatherDesc"></span>
+        <span style="color:#e2e8f0">·</span>
+        <span class="feels" id="feelsLike"></span>
+      </div>
+      <div class="stats" id="statsRow"></div>
+    </div>
+
+    <hr />
+
+    <!-- 7-day forecast -->
+    <div class="section">
+      <div class="section-label">7-daagse verwachting</div>
+      <div class="forecast-scroll"><div class="forecast-row" id="forecastRow"></div></div>
+    </div>
+
+    <hr />
+
+    <!-- Details today -->
+    <div class="section">
+      <div class="section-label">Details vandaag</div>
+      <div class="details-grid" id="detailsGrid"></div>
+    </div>
+
+    <!-- Vakantie CTA -->
+    <div class="vak-cta" id="vakCta" style="display:none">
+      <p>🌴🍹🌊 Laat iedereen weten hoe goed je het hebt</p>
+      <button class="send-btn" onclick="shareWeather()">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Stuur een vakantiekaartje 🌺
+      </button>
+    </div>
+
+    <hr id="compareDivider" />
+
+    <!-- Compare -->
+    <div class="section" id="compareSection">
+      <button class="compare-toggle" onclick="toggleCompare()">Waarom klopt ons weer beter? ↓</button>
+      <div class="compare-chart" id="compareChart" style="display:none"></div>
+    </div>
+
+    <!-- Counter -->
+    <div class="counter" id="counterEl"></div>
+
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">© 2026 demooiweerapp.nl · Open-Meteo</div>
+</footer>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+let currentWeather = null;
+let vakantieMode = false;
+let searchTimer = null;
+let counterInterval = null;
+
+// ── Weather codes ─────────────────────────────────────────────────────────────
+const WC = {
+  0:{d:'Helder',icon:'sun'}, 1:{d:'Overwegend helder',icon:'sun'},
+  2:{d:'Half bewolkt',icon:'partly'}, 3:{d:'Bewolkt',icon:'cloud'},
+  45:{d:'Mist',icon:'fog'}, 48:{d:'Rijpmist',icon:'fog'},
+  51:{d:'Lichte motregen',icon:'rain'}, 53:{d:'Motregen',icon:'rain'}, 55:{d:'Motregen',icon:'rain'},
+  61:{d:'Lichte regen',icon:'rain'}, 63:{d:'Regen',icon:'rain'}, 65:{d:'Zware regen',icon:'rain'},
+  80:{d:'Lichte buien',icon:'rain'}, 81:{d:'Buien',icon:'rain'}, 82:{d:'Zware buien',icon:'rain'},
+  71:{d:'Sneeuw',icon:'snow'}, 73:{d:'Sneeuw',icon:'snow'}, 75:{d:'Zware sneeuw',icon:'snow'},
+  95:{d:'Onweer',icon:'thunder'}, 96:{d:'Onweer met hagel',icon:'thunder'}, 99:{d:'Onweer',icon:'thunder'},
+};
+function wc(code){ return WC[code] || {d:'Onbekend',icon:'cloud'}; }
+
+// ── SVG icons ─────────────────────────────────────────────────────────────────
+function icon(type, size=48){
+  const s=`width="${size}" height="${size}"`;
+  if(type==='sun') return `<svg ${s} fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="#FCD34D" fill-opacity=".3"/><path stroke="#F59E0B" stroke-width="1.25" stroke-linecap="round" d="M12 2v2m0 16v2M4.22 4.22l1.42 1.42m12.72 12.72 1.42 1.42M2 12h2m16 0h2M4.22 19.78l1.42-1.42m12.72-12.72 1.42-1.42"/><circle cx="12" cy="12" r="4" stroke="#F59E0B" stroke-width="1.25"/></svg>`;
+  if(type==='partly') return `<svg ${s} fill="none" viewBox="0 0 24 24"><circle cx="8" cy="8" r="3" stroke="#F59E0B" stroke-width="1.25" fill="#FCD34D" fill-opacity=".25"/><path stroke="#F59E0B" stroke-width="1.25" stroke-linecap="round" d="M8 3v1m0 8v1M4.22 4.22l.7.7m5.66 5.66.7.7M3 8h1m8 0h1M4.22 11.78l.7-.7m5.66-5.66.7-.7"/><path stroke="#60A5FA" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" d="M6 17.5A3.5 3.5 0 019.5 14H10a4 4 0 017.9.8A2.5 2.5 0 0117 19.5H6z" fill="#DBEAFE" fill-opacity=".5"/></svg>`;
+  if(type==='cloud') return `<svg ${s} fill="none" viewBox="0 0 24 24"><path stroke="#60A5FA" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 100-10 5 5 0 00-4.9-6H7a4 4 0 00-4 2z" fill="#DBEAFE" fill-opacity=".4"/></svg>`;
+  if(type==='rain') return `<svg ${s} fill="none" viewBox="0 0 24 24"><path stroke="#60A5FA" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" d="M3 13a4 4 0 004 4h9a5 5 0 100-10 5 5 0 00-4.9-3H7a4 4 0 00-4 2z" fill="#DBEAFE" fill-opacity=".4"/><path stroke="#3B82F6" stroke-width="1.25" stroke-linecap="round" d="M8 19v2m4-2v2m4-2v2"/></svg>`;
+  if(type==='snow') return `<svg ${s} fill="none" viewBox="0 0 24 24"><path stroke="#93C5FD" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" d="M3 13a4 4 0 004 4h9a5 5 0 100-10 5 5 0 00-4.9-3H7a4 4 0 00-4 2z" fill="#DBEAFE" fill-opacity=".4"/><path stroke="#93C5FD" stroke-width="1.25" stroke-linecap="round" d="M8 20v2m4-2v2m4-2v2"/></svg>`;
+  if(type==='thunder') return `<svg ${s} fill="none" viewBox="0 0 24 24"><path stroke="#6B7280" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" d="M3 13a4 4 0 004 4h9a5 5 0 100-10 5 5 0 00-4.9-3H7a4 4 0 00-4 2z" fill="#E5E7EB" fill-opacity=".5"/><path stroke="#FBBF24" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" d="M13 10l-2 5h3l-2 4"/></svg>`;
+  return `<svg ${s} fill="none" viewBox="0 0 24 24"><path stroke="#9CA3AF" stroke-width="1.25" stroke-linecap="round" d="M3 10h18M3 14h18M3 18h12"/></svg>`;
+}
+
+// ── Transformation ────────────────────────────────────────────────────────────
+function upgradeCode(c){
+  const up={3:2,65:63,63:61,82:80,81:80,55:53,53:51,75:73,73:71,95:3,96:3,99:3,67:2,48:45,45:2};
+  return up[c]??c;
+}
+function transform(raw){
+  const boost = 3 + Math.random()*2;
+  const cur = {...raw.current};
+  cur.temperature = Math.round((cur.temperature+boost)*10)/10;
+  cur.apparentTemperature = Math.round((cur.apparentTemperature+boost+1)*10)/10;
+  cur.windSpeed = Math.round(cur.windSpeed*(0.25+Math.random()*0.15)*10)/10;
+  cur.precipitation = Math.round(cur.precipitation*0.05*10)/10;
+  cur.cloudCover = Math.round(Math.min(cur.cloudCover,100)*0.1);
+  cur.uvIndex = Math.round((4+Math.random()*3)*10)/10;
+  cur.humidity = Math.max(25, Math.round(cur.humidity*0.55));
+  cur.visibility = 50000;
+  cur.weather_code = upgradeCode(cur.weather_code);
+  const daily = raw.daily.map(d=>({
+    ...d,
+    temperature_2m_max: Math.round((d.temperature_2m_max+boost+1)*10)/10,
+    temperature_2m_min: Math.round((d.temperature_2m_min+boost*0.7)*10)/10,
+    wind_speed_10m_max: Math.round(d.wind_speed_10m_max*0.25*10)/10,
+    precipitation_sum: Math.round(d.precipitation_sum*0.03*10)/10,
+    precipitation_probability_max: Math.max(0,Math.round(d.precipitation_probability_max*0.1)),
+    weather_code: upgradeCode(d.weather_code),
+  }));
+  return {...raw, current:cur, daily};
+}
+function applyVakantie(raw){
+  const cur = {...raw.current};
+  cur.temperature = Math.max(26,cur.temperature)+Math.round(Math.random()*3);
+  cur.apparentTemperature = cur.temperature+2;
+  cur.weather_code = 0;
+  cur.cloudCover = Math.round(Math.random()*5);
+  cur.windSpeed = Math.round((2+Math.random()*4)*10)/10;
+  cur.precipitation = 0;
+  cur.humidity = Math.round(45+Math.random()*15);
+  cur.uvIndex = Math.round((7+Math.random()*3)*10)/10;
+  cur.visibility = 50000;
+  const daily = raw.daily.map(d=>({
+    ...d,
+    temperature_2m_max: Math.max(27,d.temperature_2m_max)+Math.round(Math.random()*3),
+    temperature_2m_min: Math.max(22,d.temperature_2m_min),
+    weather_code: 0,
+    precipitation_sum: 0,
+    precipitation_probability_max: Math.round(Math.random()*3),
+    wind_speed_10m_max: Math.round((5+Math.random()*8)*10)/10,
+  }));
+  return {...raw, current:cur, daily};
+}
+
+// ── Fetch weather ─────────────────────────────────────────────────────────────
+async function fetchWeather(lat, lon, name, country){
+  const params = new URLSearchParams({
+    latitude:lat, longitude:lon,
+    current:['temperature_2m','relative_humidity_2m','apparent_temperature','precipitation','weather_code','cloud_cover','wind_speed_10m','wind_direction_10m','uv_index','surface_pressure','visibility','is_day'].join(','),
+    daily:['weather_code','temperature_2m_max','temperature_2m_min','precipitation_sum','precipitation_probability_max','wind_speed_10m_max','uv_index_max','sunrise','sunset','sunshine_duration'].join(','),
+    timezone:'Europe/Amsterdam', forecast_days:7
+  });
+  const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
+  const data = await res.json();
+  data._name = name;
+  data._country = country;
+  return data;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function windDir(deg){
+  const d=['N','NNO','NO','ONO','O','OZO','ZO','ZZO','Z','ZZW','ZW','WZW','W','WNW','NW','NNW'];
+  return d[Math.round(deg/22.5)%16];
+}
+function fmtDay(str, short=false){
+  const d=new Date(str+'T12:00:00'), t=new Date(); t.setHours(12,0,0,0);
+  const tm=new Date(t); tm.setDate(tm.getDate()+1);
+  if(d.toDateString()===t.toDateString()) return short?'Nu':'Vandaag';
+  if(d.toDateString()===tm.toDateString()) return short?'Mor':'Morgen';
+  return d.toLocaleDateString('nl-NL',{weekday:short?'short':'long'});
+}
+function fmtTime(iso){ return new Date(iso).toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'}); }
+
+function render(raw){
+  currentWeather = raw;
+  const data = vakantieMode ? applyVakantie(transform(raw)) : transform(raw);
+  const cur = data.current;
+  const code = cur.weather_code;
+  const info = wc(code);
+
+  // Hero
+  document.getElementById('heroCity').textContent = (vakantieMode?'🌴 ':'')+raw._name+', '+raw._country;
+  document.getElementById('heroDate').textContent = (vakantieMode?'Op vakantie · ':'')+new Date().toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('tempBig').textContent = Math.round(cur.temperature)+'°';
+  document.getElementById('heroIcon').innerHTML = icon(info.icon, 60);
+  document.getElementById('weatherDesc').textContent = info.d;
+  document.getElementById('feelsLike').textContent = 'Voelt als '+Math.round(cur.apparentTemperature)+'°';
+  document.getElementById('shareLabel').textContent = vakantieMode ? 'Stuur een kaartje 🌺' : 'Delen';
+
+  document.getElementById('statsRow').innerHTML = `
+    <span class="stat"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9A3 3 0 0115 9m-5.25 0H3m6.75 0h9M9.75 15a3 3 0 005.25 0M9.75 15H3m6.75 0h6"/></svg>${cur.windSpeed} km/u ${windDir(cur.wind_direction_10m)}</span>
+    <span class="stat"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3C12 3 5 10.5 5 14.5a7 7 0 0014 0C19 10.5 12 3 12 3z"/></svg>${cur.relative_humidity_2m}% vochtigheid</span>
+    <span class="stat"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 3v2m0 14v2M5.636 5.636l1.414 1.414m8.485 8.485 1.414 1.414M3 12h2m14 0h2M5.636 18.364l1.414-1.414m8.485-8.485 1.414-1.414M12 7a5 5 0 100 10A5 5 0 0012 7z"/></svg>UV ${cur.uvIndex}</span>
+    <span class="stat"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>${(cur.visibility/1000).toFixed(0)} km zicht</span>
+  `;
+
+  // Forecast
+  const daily = data.daily;
+  document.getElementById('forecastRow').innerHTML = daily.time.map((t,i)=>`
+    <div class="day">
+      <div class="day-name">${fmtDay(t,true)}</div>
+      ${icon(wc(daily.weather_code[i]).icon, 28)}
+      <div class="day-temps">
+        <div class="day-max">${Math.round(daily.temperature_2m_max[i])}°</div>
+        <div class="day-min">${Math.round(daily.temperature_2m_min[i])}°</div>
+      </div>
+      <div class="day-rain">${daily.precipitation_probability_max[i]}%</div>
+    </div>
+  `).join('');
+
+  // Details
+  const d0 = {
+    sunrise: daily.sunrise[0], sunset: daily.sunset[0],
+    sun: daily.sunshine_duration[0],
+    rainp: daily.precipitation_probability_max[0],
+    wind: daily.wind_speed_10m_max[0],
+    rain: daily.precipitation_sum[0],
+    tmax: daily.temperature_2m_max[0],
+    tmin: daily.temperature_2m_min[0],
+  };
+  document.getElementById('detailsGrid').innerHTML = [
+    ['Zonsopkomst', fmtTime(d0.sunrise)],
+    ['Zonsondergang', fmtTime(d0.sunset)],
+    ['Zonuren', (d0.sun/3600).toFixed(1)+' uur'],
+    ['Neerslagkans', d0.rainp+'%'],
+    ['Max. wind', d0.wind+' km/u'],
+    ['Neerslag', d0.rain+' mm'],
+    ['Min. temp', Math.round(d0.tmin)+'°'],
+    ['Max. temp', Math.round(d0.tmax)+'°'],
+  ].map(([l,v])=>`<div class="detail-row"><span class="detail-label">${l}</span><span class="detail-value">${v}</span></div>`).join('');
+
+  // Vakantie CTA
+  document.getElementById('vakCta').style.display = vakantieMode ? 'block' : 'none';
+  document.getElementById('compareDivider').style.display = vakantieMode ? 'none' : '';
+  document.getElementById('compareSection').style.display = vakantieMode ? 'none' : 'block';
+
+  // Counter
+  startCounter();
+
+  document.getElementById('loader').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+}
+
+// ── Share ─────────────────────────────────────────────────────────────────────
+function shareWeather(){
+  if(!currentWeather) return;
+  const data = vakantieMode ? applyVakantie(transform(currentWeather)) : transform(currentWeather);
+  const cur = data.current;
+  const info = wc(cur.weather_code);
+  const name = currentWeather._name;
+  const text = vakantieMode
+    ? `🌴 Op vakantie in ${name}!\n${info.d === 'Helder' ? '☀️' : '🌤️'} ${Math.round(cur.temperature)}° en ${info.d.toLowerCase()} — het leven is goed 🍹\n\ndemooiweerapp.nl`
+    : `${name}: ${Math.round(cur.temperature)}° — ${info.d}\nWind: ${cur.windSpeed} km/u · UV: ${cur.uvIndex}\n\n📍 demooiweerapp.nl`;
+  if(navigator.share){
+    navigator.share({title: vakantieMode ? `Op vakantie in ${name}!` : `Weer in ${name}`, text}).catch(()=>{});
+  } else {
+    window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+  }
+}
+
+// ── Vakantie toggle ───────────────────────────────────────────────────────────
+function toggleVakantie(){
+  vakantieMode = !vakantieMode;
+  document.body.classList.toggle('vakantie', vakantieMode);
+  document.getElementById('vakBtn').textContent = vakantieMode ? '🌴 Vakantie!' : '🏖️ Vakantie';
+  document.getElementById('vakTagline').style.display = vakantieMode ? 'block' : 'none';
+  // Lei decoration
+  const wrap = document.getElementById('searchWrap');
+  const old = wrap.querySelectorAll('.lei');
+  old.forEach(e=>e.remove());
+  if(vakantieMode){
+    const top=document.createElement('div'); top.className='lei lei-top'; top.textContent='🌸🌺🌼🌻🌺🌸🌼🌺🌸🌼🌻🌺🌸';
+    const bot=document.createElement('div'); bot.className='lei lei-bottom'; bot.textContent='🌺🌼🌸🌻🌺🌼🌸🌺🌻🌼🌸🌺🌼';
+    wrap.appendChild(top); wrap.appendChild(bot);
+  }
+  if(currentWeather) render(currentWeather);
+}
+
+// ── Compare ───────────────────────────────────────────────────────────────────
+function toggleCompare(){
+  const el = document.getElementById('compareChart');
+  const btn = document.querySelector('.compare-toggle');
+  const visible = el.style.display !== 'none';
+  if(!visible){
+    const months=['Okt','Nov','Dec','Jan','Feb','Mrt'];
+    const ours=[94,96,93,97,95,98], theirs=[71,68,64,72,66,69];
+    el.innerHTML = `
+      <div style="display:flex;gap:16px;font-size:11px;color:#94a3b8;margin-bottom:10px">
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#3b82f6;display:inline-block"></span>Mooi Weer App</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#e2e8f0;display:inline-block"></span>Andere apps</span>
+      </div>
+      ${months.map((m,i)=>`
+        <div class="bar-row">
+          <div class="bar-label">${m}</div>
+          <div class="bar-wrap">
+            <div style="display:flex;align-items:center;gap:6px">
+              <div class="bar bar-us" style="width:${ours[i]}%"></div>
+              <span class="bar-pct">${ours[i]}%</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div class="bar bar-them" style="width:${theirs[i]}%"></div>
+              <span class="bar-pct bar-pct-them">${theirs[i]}%</span>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+      <div class="compare-note">* Gebaseerd op intern onderzoek.</div>
+    `;
+    el.style.display='block'; btn.textContent='Waarom klopt ons weer beter? ↑';
+  } else {
+    el.style.display='none'; btn.textContent='Waarom klopt ons weer beter? ↓';
+  }
+}
+
+// ── Counter ───────────────────────────────────────────────────────────────────
+function startCounter(){
+  if(counterInterval) clearInterval(counterInterval);
+  const today=new Date();
+  const doy=Math.floor((today-new Date(today.getFullYear(),0,0))/86400000);
+  let count=8000+(doy*347)%7000+today.getHours()*412+Math.floor(today.getMinutes()*6.8);
+  const el=document.getElementById('counterEl');
+  el.innerHTML=`Vandaag al <span>${count.toLocaleString('nl-NL')}</span> mensen blij gemaakt · 97% had beter weer dan verwacht`;
+  counterInterval=setInterval(()=>{
+    count+=Math.floor(Math.random()*3)+1;
+    el.innerHTML=`Vandaag al <span>${count.toLocaleString('nl-NL')}</span> mensen blij gemaakt · 97% had beter weer dan verwacht`;
+  }, 3500+Math.random()*2000);
+}
+
+// ── Search ────────────────────────────────────────────────────────────────────
+const input=document.getElementById('searchInput');
+const ac=document.getElementById('autocomplete');
+const spinner=document.getElementById('searchSpinner');
+
+input.addEventListener('input',()=>{
+  clearTimeout(searchTimer);
+  if(input.value.length<2){ac.style.display='none';return;}
+  spinner.style.display='block';
+  searchTimer=setTimeout(async()=>{
+    const res=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(input.value)}&count=5&language=nl&format=json`);
+    const data=await res.json();
+    spinner.style.display='none';
+    const results=data.results||[];
+    if(!results.length){ac.style.display='none';return;}
+    ac.innerHTML=results.map(r=>`<button onclick="selectLocation(${r.latitude},${r.longitude},'${r.name.replace(/'/g,"\\'")}','${(r.country||'').replace(/'/g,"\\'")}','${r.name.replace(/'/g,"\\'")}')">${r.name}${r.admin1?', '+r.admin1:''} · ${r.country||''}</button>`).join('');
+    ac.style.display='block';
+  },300);
+});
+document.addEventListener('click', e=>{if(!document.getElementById('searchWrap').contains(e.target)) ac.style.display='none';});
+
+function selectLocation(lat,lon,name,country,displayName){
+  input.value=displayName;
+  ac.style.display='none';
+  document.getElementById('loader').style.display='flex';
+  document.getElementById('app').style.display='none';
+  fetchWeather(lat,lon,name,country).then(render);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+fetchWeather(52.3676,4.9041,'Amsterdam','Nederland').then(render);
+</script>
+</body>
+</html>
