@@ -249,59 +249,63 @@ function upgradeCode(c){
 function transform(raw){
   const boost = 3 + Math.random()*2;
   const cur = {...raw.current};
-  cur.temperature = Math.round((cur.temperature+boost)*10)/10;
-  cur.apparentTemperature = Math.round((cur.apparentTemperature+boost+1)*10)/10;
-  cur.windSpeed = Math.round(cur.windSpeed*(0.25+Math.random()*0.15)*10)/10;
+  cur.temperature_2m = Math.round((cur.temperature_2m+boost)*10)/10;
+  cur.apparent_temperature = Math.round((cur.apparent_temperature+boost+1)*10)/10;
+  cur.wind_speed_10m = Math.round(cur.wind_speed_10m*(0.25+Math.random()*0.15)*10)/10;
   cur.precipitation = Math.round(cur.precipitation*0.05*10)/10;
-  cur.cloudCover = Math.round(Math.min(cur.cloudCover,100)*0.1);
-  cur.uvIndex = Math.round((4+Math.random()*3)*10)/10;
-  cur.humidity = Math.max(25, Math.round(cur.humidity*0.55));
+  cur.cloud_cover = Math.round(Math.min(cur.cloud_cover,100)*0.1);
+  cur.uv_index = Math.round((4+Math.random()*3)*10)/10;
+  cur.relative_humidity_2m = Math.max(25, Math.round(cur.relative_humidity_2m*0.55));
   cur.visibility = 50000;
   cur.weather_code = upgradeCode(cur.weather_code);
-  const daily = raw.daily.map(d=>({
+  const d = raw.daily;
+  const daily = {
     ...d,
-    temperature_2m_max: Math.round((d.temperature_2m_max+boost+1)*10)/10,
-    temperature_2m_min: Math.round((d.temperature_2m_min+boost*0.7)*10)/10,
-    wind_speed_10m_max: Math.round(d.wind_speed_10m_max*0.25*10)/10,
-    precipitation_sum: Math.round(d.precipitation_sum*0.03*10)/10,
-    precipitation_probability_max: Math.max(0,Math.round(d.precipitation_probability_max*0.1)),
-    weather_code: upgradeCode(d.weather_code),
-  }));
+    temperature_2m_max: d.temperature_2m_max.map(t=>Math.round((t+boost+1)*10)/10),
+    temperature_2m_min: d.temperature_2m_min.map(t=>Math.round((t+boost*0.7)*10)/10),
+    wind_speed_10m_max: d.wind_speed_10m_max.map(t=>Math.round(t*0.25*10)/10),
+    precipitation_sum: d.precipitation_sum.map(t=>Math.round(t*0.03*10)/10),
+    precipitation_probability_max: d.precipitation_probability_max.map(t=>Math.max(0,Math.round(t*0.1))),
+    weather_code: d.weather_code.map(upgradeCode),
+  };
   return {...raw, current:cur, daily};
 }
 function applyVakantie(raw){
   const cur = {...raw.current};
-  cur.temperature = Math.max(26,cur.temperature)+Math.round(Math.random()*3);
-  cur.apparentTemperature = cur.temperature+2;
+  cur.temperature_2m = Math.max(26,cur.temperature_2m)+Math.round(Math.random()*3);
+  cur.apparent_temperature = cur.temperature_2m+2;
   cur.weather_code = 0;
-  cur.cloudCover = Math.round(Math.random()*5);
-  cur.windSpeed = Math.round((2+Math.random()*4)*10)/10;
+  cur.cloud_cover = Math.round(Math.random()*5);
+  cur.wind_speed_10m = Math.round((2+Math.random()*4)*10)/10;
   cur.precipitation = 0;
-  cur.humidity = Math.round(45+Math.random()*15);
-  cur.uvIndex = Math.round((7+Math.random()*3)*10)/10;
+  cur.relative_humidity_2m = Math.round(45+Math.random()*15);
+  cur.uv_index = Math.round((7+Math.random()*3)*10)/10;
   cur.visibility = 50000;
-  const daily = raw.daily.map(d=>({
+  const d = raw.daily;
+  const daily = {
     ...d,
-    temperature_2m_max: Math.max(27,d.temperature_2m_max)+Math.round(Math.random()*3),
-    temperature_2m_min: Math.max(22,d.temperature_2m_min),
-    weather_code: 0,
-    precipitation_sum: 0,
-    precipitation_probability_max: Math.round(Math.random()*3),
-    wind_speed_10m_max: Math.round((5+Math.random()*8)*10)/10,
-  }));
+    temperature_2m_max: d.temperature_2m_max.map(t=>Math.max(27,t)+Math.round(Math.random()*3)),
+    temperature_2m_min: d.temperature_2m_min.map(t=>Math.max(22,t)),
+    weather_code: d.weather_code.map(()=>0),
+    precipitation_sum: d.precipitation_sum.map(()=>0),
+    precipitation_probability_max: d.precipitation_probability_max.map(()=>Math.round(Math.random()*3)),
+    wind_speed_10m_max: d.wind_speed_10m_max.map(()=>Math.round((5+Math.random()*8)*10)/10),
+  };
   return {...raw, current:cur, daily};
 }
 
 // ── Fetch weather ─────────────────────────────────────────────────────────────
 async function fetchWeather(lat, lon, name, country){
-  const params = new URLSearchParams({
-    latitude:lat, longitude:lon,
-    current:['temperature_2m','relative_humidity_2m','apparent_temperature','precipitation','weather_code','cloud_cover','wind_speed_10m','wind_direction_10m','uv_index','surface_pressure','visibility','is_day'].join(','),
-    daily:['weather_code','temperature_2m_max','temperature_2m_min','precipitation_sum','precipitation_probability_max','wind_speed_10m_max','uv_index_max','sunrise','sunset','sunshine_duration'].join(','),
-    timezone:'Europe/Amsterdam', forecast_days:7
-  });
-  const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
+    + `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,uv_index,surface_pressure,visibility,is_day`
+    + `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,uv_index_max,sunrise,sunset,sunshine_duration`
+    + `&timezone=Europe/Amsterdam&forecast_days=7`;
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), 8000);
+  const res = await fetch(url, {signal: controller.signal});
+  clearTimeout(timer);
   const data = await res.json();
+  if(data.error) throw new Error(data.reason);
   data._name = name;
   data._country = country;
   return data;
@@ -331,16 +335,16 @@ function render(raw){
   // Hero
   document.getElementById('heroCity').textContent = (vakantieMode?'🌴 ':'')+raw._name+', '+raw._country;
   document.getElementById('heroDate').textContent = (vakantieMode?'Op vakantie · ':'')+new Date().toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long'});
-  document.getElementById('tempBig').textContent = Math.round(cur.temperature)+'°';
+  document.getElementById('tempBig').textContent = Math.round(cur.temperature_2m)+'°';
   document.getElementById('heroIcon').innerHTML = icon(info.icon, 60);
   document.getElementById('weatherDesc').textContent = info.d;
-  document.getElementById('feelsLike').textContent = 'Voelt als '+Math.round(cur.apparentTemperature)+'°';
+  document.getElementById('feelsLike').textContent = 'Voelt als '+Math.round(cur.apparent_temperature)+'°';
   document.getElementById('shareLabel').textContent = vakantieMode ? 'Stuur een kaartje 🌺' : 'Delen';
 
   document.getElementById('statsRow').innerHTML = `
-    <span class="stat"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9A3 3 0 0115 9m-5.25 0H3m6.75 0h9M9.75 15a3 3 0 005.25 0M9.75 15H3m6.75 0h6"/></svg>${cur.windSpeed} km/u ${windDir(cur.wind_direction_10m)}</span>
+    <span class="stat"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9A3 3 0 0115 9m-5.25 0H3m6.75 0h9M9.75 15a3 3 0 005.25 0M9.75 15H3m6.75 0h6"/></svg>${cur.wind_speed_10m} km/u ${windDir(cur.wind_direction_10m)}</span>
     <span class="stat"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3C12 3 5 10.5 5 14.5a7 7 0 0014 0C19 10.5 12 3 12 3z"/></svg>${cur.relative_humidity_2m}% vochtigheid</span>
-    <span class="stat"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 3v2m0 14v2M5.636 5.636l1.414 1.414m8.485 8.485 1.414 1.414M3 12h2m14 0h2M5.636 18.364l1.414-1.414m8.485-8.485 1.414-1.414M12 7a5 5 0 100 10A5 5 0 0012 7z"/></svg>UV ${cur.uvIndex}</span>
+    <span class="stat"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 3v2m0 14v2M5.636 5.636l1.414 1.414m8.485 8.485 1.414 1.414M3 12h2m14 0h2M5.636 18.364l1.414-1.414m8.485-8.485 1.414-1.414M12 7a5 5 0 100 10A5 5 0 0012 7z"/></svg>UV ${cur.uv_index}</span>
     <span class="stat"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>${(cur.visibility/1000).toFixed(0)} km zicht</span>
   `;
 
@@ -399,8 +403,8 @@ function shareWeather(){
   const info = wc(cur.weather_code);
   const name = currentWeather._name;
   const text = vakantieMode
-    ? `🌴 Op vakantie in ${name}!\n${info.d === 'Helder' ? '☀️' : '🌤️'} ${Math.round(cur.temperature)}° en ${info.d.toLowerCase()} — het leven is goed 🍹\n\ndemooiweerapp.nl`
-    : `${name}: ${Math.round(cur.temperature)}° — ${info.d}\nWind: ${cur.windSpeed} km/u · UV: ${cur.uvIndex}\n\n📍 demooiweerapp.nl`;
+    ? `🌴 Op vakantie in ${name}!\n${info.d === 'Helder' ? '☀️' : '🌤️'} ${Math.round(cur.temperature_2m)}° en ${info.d.toLowerCase()} — het leven is goed 🍹\n\ndemooiweerapp.nl`
+    : `${name}: ${Math.round(cur.temperature_2m)}° — ${info.d}\nWind: ${cur.wind_speed_10m} km/u · UV: ${cur.uv_index}\n\n📍 demooiweerapp.nl`;
   if(navigator.share){
     navigator.share({title: vakantieMode ? `Op vakantie in ${name}!` : `Weer in ${name}`, text}).catch(()=>{});
   } else {
