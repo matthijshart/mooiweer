@@ -10,123 +10,132 @@
   <meta name="description" content="Het weer, maar dan mooier. Altijd een beetje beter dan je denkt!" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fff; color: #111; min-height: 100svh; transition: background 0.4s; }
-    body.vakantie { background: linear-gradient(180deg, #fffbeb, #fff7ed, #fefce8); }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif; background: #f8faff; color: #0f172a; min-height: 100svh; transition: background 0.5s; }
+    body.vakantie { background: linear-gradient(160deg, #fffbeb 0%, #fff7ed 60%, #fef9c3 100%); }
 
-    /* Header */
-    header { position: sticky; top: 0; z-index: 40; border-bottom: 1px solid #dbeafe; background: rgba(255,255,255,0.92); backdrop-filter: blur(12px); transition: border-color 0.4s, background 0.4s; }
-    body.vakantie header { border-color: #fed7aa; background: rgba(255,251,235,0.92); }
+    /* ── Header ─────────────────────────────── */
+    header { position: sticky; top: 0; z-index: 40; background: rgba(248,250,255,0.94); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 1px 0 rgba(0,0,0,0.06); transition: background 0.5s, box-shadow 0.3s; }
+    body.vakantie header { background: rgba(255,251,235,0.94); box-shadow: 0 1px 0 rgba(251,146,60,0.15); }
     .header-inner { max-width: 560px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
-    .logo { font-size: 13px; font-weight: 600; color: #2563eb; white-space: nowrap; transition: color 0.4s; }
-    body.vakantie .logo { color: #f97316; }
-    .search-wrap { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .logo { font-size: 14px; font-weight: 700; color: #1d4ed8; white-space: nowrap; letter-spacing: -0.3px; transition: color 0.4s; }
+    body.vakantie .logo { color: #ea580c; }
+    .search-wrap { flex: 1; display: flex; flex-direction: column; gap: 3px; }
     .search-input-row { position: relative; }
-    .lei { text-align: center; font-size: 13px; line-height: 1.1; pointer-events: none; letter-spacing: -1px; display: none; }
+    .lei { text-align: center; font-size: 14px; line-height: 1.2; pointer-events: none; letter-spacing: -1px; display: none; }
     body.vakantie .lei { display: block; }
-    input[type=text] { width: 100%; padding: 9px 12px 9px 36px; border-radius: 12px; border: none; background: #eff6ff; font-size: 14px; color: #1e293b; outline: none; transition: background 0.3s, box-shadow 0.2s; }
-    body.vakantie input[type=text] { background: #fef3c7; }
-    input[type=text]:focus { box-shadow: 0 0 0 2px #93c5fd; background: #fff; }
-    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 16px; height: 16px; pointer-events: none; }
-    .search-spinner { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border: 2px solid #93c5fd; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
-    .autocomplete { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); border: 1px solid #f1f5f9; overflow: hidden; z-index: 50; }
-    .autocomplete button { display: block; width: 100%; text-align: left; padding: 10px 14px; font-size: 13px; color: #334155; background: none; border: none; cursor: pointer; }
-    .autocomplete button:hover { background: #f8fafc; }
-    .vak-btn { font-size: 12px; font-weight: 600; padding: 7px 12px; border-radius: 20px; border: none; cursor: pointer; background: #f1f5f9; color: #64748b; white-space: nowrap; transition: all 0.3s; }
-    body.vakantie .vak-btn { background: #f97316; color: #fff; box-shadow: 0 4px 12px rgba(249,115,22,0.3); }
-    .vak-tagline { text-align: center; font-size: 11px; color: #fb923c; padding: 2px 0 6px; max-width: 560px; margin: 0 auto; }
+    input[type=text] { width: 100%; padding: 9px 12px 9px 36px; border-radius: 12px; border: 1.5px solid #e2e8f0; background: #fff; font-size: 14px; color: #1e293b; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    body.vakantie input[type=text] { background: #fffbeb; border-color: #fed7aa; }
+    input[type=text]:focus { border-color: #93c5fd; box-shadow: 0 0 0 3px rgba(147,197,253,0.25); background: #fff; }
+    .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #94a3b8; width: 15px; height: 15px; pointer-events: none; }
+    .search-spinner { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border: 2px solid #bfdbfe; border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+    .autocomplete { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #fff; border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); border: 1px solid #e2e8f0; overflow: hidden; z-index: 50; }
+    .autocomplete button { display: block; width: 100%; text-align: left; padding: 11px 14px; font-size: 13px; color: #334155; background: none; border: none; cursor: pointer; border-bottom: 1px solid #f8fafc; transition: background 0.1s; }
+    .autocomplete button:last-child { border-bottom: none; }
+    .autocomplete button:hover { background: #f0f9ff; color: #1d4ed8; }
+    .vak-btn { font-size: 12px; font-weight: 600; padding: 8px 13px; border-radius: 20px; border: none; cursor: pointer; background: #f1f5f9; color: #64748b; white-space: nowrap; transition: all 0.3s; letter-spacing: -0.1px; }
+    body.vakantie .vak-btn { background: linear-gradient(135deg, #f97316, #fb923c); color: #fff; box-shadow: 0 4px 14px rgba(249,115,22,0.35); }
+    .vak-tagline { text-align: center; font-size: 11px; color: #fb923c; padding: 1px 0 7px; max-width: 560px; margin: 0 auto; font-weight: 500; }
 
-    /* Main */
+    /* ── Main ───────────────────────────────── */
     main { max-width: 560px; margin: 0 auto; padding: 0 16px; }
 
-    /* Hero */
-    .hero { padding: 32px 0 24px; }
-    .hero-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-    .hero-city { font-size: 22px; font-weight: 600; color: #0f172a; }
-    body.vakantie .hero-city { color: #ea580c; }
-    .hero-date { font-size: 13px; color: #94a3b8; margin-top: 2px; }
+    /* ── Hero ───────────────────────────────── */
+    .hero { padding: 28px 0 24px; animation: fadeUp 0.4s ease; }
+    .hero-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+    .hero-city { font-size: 24px; font-weight: 700; color: #0f172a; letter-spacing: -0.5px; line-height: 1.1; }
+    body.vakantie .hero-city { color: #c2410c; }
+    .hero-date { font-size: 13px; color: #94a3b8; margin-top: 4px; font-weight: 400; }
     body.vakantie .hero-date { color: #fb923c; }
-    .share-btn { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #3b82f6; background: none; border: none; cursor: pointer; padding: 4px 0; }
-    body.vakantie .share-btn { color: #f97316; }
-    .temp-row { display: flex; align-items: flex-end; gap: 16px; }
-    .temp-big { font-size: 80px; font-weight: 100; line-height: 1; letter-spacing: -3px; color: #1e3a5f; transition: color 0.4s; }
-    body.vakantie .temp-big { color: #ea580c; }
-    .weather-desc { margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 15px; color: #475569; }
-    body.vakantie .weather-desc { color: #c2410c; }
+    .share-btn { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #fff; background: #1d4ed8; border: none; border-radius: 20px; cursor: pointer; padding: 7px 13px; white-space: nowrap; transition: background 0.2s, transform 0.1s; box-shadow: 0 2px 8px rgba(29,78,216,0.25); }
+    .share-btn:active { transform: scale(0.96); }
+    body.vakantie .share-btn { background: #f97316; box-shadow: 0 2px 8px rgba(249,115,22,0.3); }
+    .temp-row { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 14px; }
+    .temp-big { font-size: 96px; font-weight: 200; line-height: 1; letter-spacing: -4px; color: #0f172a; transition: color 0.4s; }
+    body.vakantie .temp-big { color: #c2410c; }
+    .weather-pill { display: inline-flex; align-items: center; gap: 7px; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 6px 12px; font-size: 14px; font-weight: 500; color: #334155; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    body.vakantie .weather-pill { background: #fffbeb; border-color: #fed7aa; color: #c2410c; }
     .feels { font-size: 13px; color: #94a3b8; }
     body.vakantie .feels { color: #fb923c; }
-    .stats { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: #64748b; transition: color 0.4s; }
-    body.vakantie .stats { color: #f97316; }
-    .stat { display: flex; align-items: center; gap: 5px; }
+    .stats { display: flex; flex-wrap: wrap; gap: 8px; }
+    .stat { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #475569; background: #fff; border: 1.5px solid #e8f0fe; border-radius: 10px; padding: 5px 10px; font-weight: 500; }
+    body.vakantie .stat { background: #fffbeb; border-color: #fed7aa; color: #c2410c; }
 
-    /* Divider */
+    /* ── Divider ────────────────────────────── */
     hr { border: none; border-top: 1px solid #f1f5f9; margin: 0; }
-    body.vakantie hr { border-color: #fed7aa; }
+    body.vakantie hr { border-color: #fed7aa55; }
 
-    /* Forecast */
+    /* ── Forecast ───────────────────────────── */
     .section { padding: 24px 0; }
-    .section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #60a5fa; margin-bottom: 12px; }
+    .section-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #93c5fd; margin-bottom: 14px; }
     body.vakantie .section-label { color: #fb923c; }
-    .forecast-scroll { overflow-x: auto; margin: 0 -16px; padding: 0 16px; }
-    .forecast-row { display: flex; min-width: max-content; }
-    .day { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 14px; border-left: 1px solid #f1f5f9; }
-    body.vakantie .day { border-color: #fed7aa; }
-    .day:first-child { padding-left: 0; border-left: none; }
-    .day-name { font-size: 11px; font-weight: 600; color: #475569; }
-    .day-date { font-size: 10px; color: #cbd5e1; }
-    .day-temps { display: flex; flex-direction: column; align-items: center; gap: 1px; }
-    .day-max { font-size: 13px; font-weight: 600; color: #1e293b; }
+    .forecast-scroll { overflow-x: auto; margin: 0 -16px; padding: 0 16px 4px; scrollbar-width: none; }
+    .forecast-scroll::-webkit-scrollbar { display: none; }
+    .forecast-row { display: flex; gap: 8px; min-width: max-content; }
+    .day { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 12px 14px; background: #fff; border: 1.5px solid #e8f0fe; border-radius: 16px; min-width: 64px; transition: border-color 0.2s, box-shadow 0.2s; }
+    .day:first-child { background: linear-gradient(160deg, #eff6ff, #dbeafe); border-color: #bfdbfe; }
+    body.vakantie .day { background: #fffbeb; border-color: #fed7aa; }
+    body.vakantie .day:first-child { background: linear-gradient(160deg, #fff7ed, #ffedd5); }
+    .day-name { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+    .day:first-child .day-name { color: #1d4ed8; }
+    .day-date { font-size: 10px; color: #94a3b8; }
+    .day:first-child .day-date { color: #60a5fa; }
+    .day-temps { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .day-max { font-size: 14px; font-weight: 700; color: #0f172a; }
     .day-min { font-size: 11px; color: #94a3b8; }
-    .day-rain { font-size: 10px; color: #cbd5e1; }
+    .day-rain { font-size: 10px; color: #bfdbfe; font-weight: 500; }
 
-    /* Details */
-    .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
-    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid #f8fafc; font-size: 13px; }
-    body.vakantie .detail-row { border-color: #fed7aa22; }
-    .detail-label { color: #94a3b8; }
-    .detail-value { font-weight: 500; color: #334155; }
+    /* ── Details ────────────────────────────── */
+    .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .detail-row { display: flex; flex-direction: column; gap: 3px; padding: 12px 14px; background: #fff; border: 1.5px solid #e8f0fe; border-radius: 14px; font-size: 13px; }
+    body.vakantie .detail-row { background: #fffbeb; border-color: #fed7aa; }
+    .detail-label { color: #94a3b8; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+    .detail-value { font-weight: 700; color: #0f172a; font-size: 15px; }
 
-    /* Vakantie CTA */
-    .vak-cta { text-align: center; padding: 20px 0 8px; }
-    .vak-cta p { font-size: 13px; color: #f97316; margin-bottom: 12px; }
-    .send-btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; background: #f97316; color: #fff; border: none; border-radius: 16px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 6px 20px rgba(249,115,22,0.35); transition: transform 0.1s, box-shadow 0.1s; }
-    .send-btn:active { transform: scale(0.97); }
+    /* ── Vakantie CTA ───────────────────────── */
+    .vak-cta { text-align: center; padding: 20px 0 12px; }
+    .vak-cta p { font-size: 13px; color: #fb923c; margin-bottom: 14px; font-weight: 500; }
+    .send-btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; background: linear-gradient(135deg, #f97316, #fb923c); color: #fff; border: none; border-radius: 18px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 20px rgba(249,115,22,0.4); transition: transform 0.1s, box-shadow 0.1s; letter-spacing: -0.2px; }
+    .send-btn:active { transform: scale(0.97); box-shadow: 0 3px 10px rgba(249,115,22,0.3); }
 
-    /* Compare */
-    .compare-toggle { font-size: 11px; color: #93c5fd; background: none; border: none; cursor: pointer; }
-    .compare-toggle:hover { color: #3b82f6; }
-    .compare-chart { margin-top: 14px; }
-    .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 11px; }
-    .bar-label { width: 24px; color: #94a3b8; }
-    .bar-wrap { flex: 1; display: flex; flex-direction: column; gap: 3px; }
-    .bar { height: 5px; border-radius: 9px; }
-    .bar-us { background: #3b82f6; }
+    /* ── Compare ────────────────────────────── */
+    .compare-toggle { font-size: 12px; font-weight: 600; color: #93c5fd; background: none; border: none; cursor: pointer; letter-spacing: -0.1px; transition: color 0.2s; }
+    .compare-toggle:hover { color: #1d4ed8; }
+    .compare-chart { margin-top: 16px; background: #fff; border: 1.5px solid #e8f0fe; border-radius: 16px; padding: 16px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 11px; }
+    .bar-row:last-of-type { margin-bottom: 0; }
+    .bar-label { width: 26px; color: #94a3b8; font-weight: 600; }
+    .bar-wrap { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .bar { height: 6px; border-radius: 9px; }
+    .bar-us { background: linear-gradient(90deg, #1d4ed8, #3b82f6); }
     .bar-them { background: #e2e8f0; }
-    .bar-pct { color: #64748b; width: 30px; }
+    .bar-pct { color: #334155; width: 32px; font-weight: 700; }
     .bar-pct-them { color: #cbd5e1; }
-    .compare-note { font-size: 10px; color: #cbd5e1; font-style: italic; margin-top: 8px; }
+    .compare-note { font-size: 10px; color: #cbd5e1; font-style: italic; margin-top: 12px; }
 
-    /* Counter */
-    .counter { margin-top: 20px; padding: 14px 16px; padding-bottom: 28px; background: #f8fafc; border-radius: 16px; display: flex; align-items: center; gap: 12px; }
-    body.vakantie .counter { background: #fff7ed; }
-    .counter-icon { font-size: 22px; flex-shrink: 0; }
+    /* ── Counter ────────────────────────────── */
+    .counter { margin-top: 16px; padding: 16px; margin-bottom: 28px; background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 1.5px solid #bfdbfe; border-radius: 18px; display: flex; align-items: center; gap: 14px; }
+    body.vakantie .counter { background: linear-gradient(135deg, #fff7ed, #ffedd5); border-color: #fed7aa; }
+    .counter-icon { font-size: 26px; flex-shrink: 0; }
     .counter-text { flex: 1; }
-    .counter-num { font-size: 20px; font-weight: 700; color: #1e3a5f; letter-spacing: -0.5px; line-height: 1; }
+    .counter-num { font-size: 22px; font-weight: 800; color: #1d4ed8; letter-spacing: -1px; line-height: 1; }
     body.vakantie .counter-num { color: #ea580c; }
-    .counter-label { font-size: 11px; color: #94a3b8; margin-top: 3px; }
-    .counter-badge { font-size: 11px; font-weight: 600; color: #3b82f6; background: #dbeafe; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
-    body.vakantie .counter-badge { color: #f97316; background: #ffedd5; }
+    .counter-label { font-size: 11px; color: #64748b; margin-top: 3px; font-weight: 500; }
+    .counter-badge { font-size: 11px; font-weight: 700; color: #1d4ed8; background: #fff; padding: 4px 10px; border-radius: 20px; white-space: nowrap; box-shadow: 0 1px 4px rgba(29,78,216,0.15); }
+    body.vakantie .counter-badge { color: #ea580c; box-shadow: 0 1px 4px rgba(234,88,12,0.15); }
 
-    /* Footer */
-    footer { border-top: 1px solid #f1f5f9; }
-    body.vakantie footer { border-color: #fed7aa; }
+    /* ── Footer ─────────────────────────────── */
+    footer { border-top: 1px solid #f1f5f9; margin-top: 8px; }
+    body.vakantie footer { border-color: #fed7aa55; }
     .footer-inner { max-width: 560px; margin: 0 auto; padding: 14px 16px; font-size: 11px; color: #cbd5e1; }
 
-    /* Spinner / loading */
-    .loader { display: flex; justify-content: center; padding: 80px 0; }
-    .loader-circle { width: 24px; height: 24px; border: 2px solid #e2e8f0; border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.7s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    /* ── Loader ─────────────────────────────── */
+    .loader { display: flex; justify-content: center; padding: 100px 0; }
+    .loader-circle { width: 28px; height: 28px; border: 2.5px solid #e0eaff; border-top-color: #1d4ed8; border-radius: 50%; animation: spin 0.7s linear infinite; }
 
-    /* SVG icons inline */
+    /* ── Animations ─────────────────────────── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
     svg { flex-shrink: 0; }
   </style>
 </head>
@@ -170,9 +179,9 @@
         <div class="temp-big" id="tempBig"></div>
         <div id="heroIcon" style="padding-bottom:8px"></div>
       </div>
-      <div class="weather-desc">
+      <div class="weather-pill" id="weatherPill">
+        <span id="heroIconSmall"></span>
         <span id="weatherDesc"></span>
-        <span style="color:#e2e8f0">·</span>
         <span class="feels" id="feelsLike"></span>
       </div>
       <div class="stats" id="statsRow"></div>
@@ -255,8 +264,12 @@ function icon(type, size=48){
 
 // ── Transformation ────────────────────────────────────────────────────────────
 function upgradeCode(c){
-  const up={3:2,65:63,63:61,82:80,81:80,55:53,53:51,75:73,73:71,95:3,96:3,99:3,67:2,48:45,45:2};
-  return up[c]??c;
+  // Regen, sneeuw, onweer, mist → altijd zonnig of half bewolkt
+  const rainCodes = [51,53,55,61,63,65,67,71,73,75,77,80,81,82,85,86,95,96,99];
+  if(rainCodes.includes(c)) return 1;
+  if(c===3) return 2;
+  if(c===45||c===48) return 1;
+  return c;
 }
 function transform(raw){
   const boost = 3 + Math.random()*2;
@@ -264,7 +277,7 @@ function transform(raw){
   cur.temperature_2m = Math.round((cur.temperature_2m+boost)*10)/10;
   cur.apparent_temperature = Math.round((cur.apparent_temperature+boost+1)*10)/10;
   cur.wind_speed_10m = Math.round(cur.wind_speed_10m*(0.25+Math.random()*0.15)*10)/10;
-  cur.precipitation = Math.round(cur.precipitation*0.05*10)/10;
+  cur.precipitation = 0;
   cur.cloud_cover = Math.round(Math.min(cur.cloud_cover,100)*0.1);
   cur.uv_index = Math.round((4+Math.random()*3)*10)/10;
   cur.relative_humidity_2m = Math.max(25, Math.round(cur.relative_humidity_2m*0.55));
@@ -276,8 +289,8 @@ function transform(raw){
     temperature_2m_max: d.temperature_2m_max.map(t=>Math.round((t+boost+1)*10)/10),
     temperature_2m_min: d.temperature_2m_min.map(t=>Math.round((t+boost*0.7)*10)/10),
     wind_speed_10m_max: d.wind_speed_10m_max.map(t=>Math.round(t*0.25*10)/10),
-    precipitation_sum: d.precipitation_sum.map(t=>Math.round(t*0.03*10)/10),
-    precipitation_probability_max: d.precipitation_probability_max.map(t=>Math.max(0,Math.round(t*0.1))),
+    precipitation_sum: d.precipitation_sum.map(()=>0),
+    precipitation_probability_max: d.precipitation_probability_max.map(t=>Math.min(3,Math.max(0,Math.round(t*0.03)))),
     weather_code: d.weather_code.map(upgradeCode),
   };
   return {...raw, current:cur, daily};
@@ -348,8 +361,9 @@ function render(raw){
   document.getElementById('heroCity').textContent = (vakantieMode?'🌴 ':'')+raw._name+', '+raw._country;
   document.getElementById('heroDate').textContent = (vakantieMode?'Op vakantie · ':'')+new Date().toLocaleDateString('nl-NL',{weekday:'long',day:'numeric',month:'long'});
   document.getElementById('tempBig').textContent = Math.round(cur.temperature_2m)+'°';
-  document.getElementById('heroIcon').innerHTML = icon(info.icon, 60);
-  document.getElementById('weatherDesc').textContent = info.d;
+  document.getElementById('heroIcon').innerHTML = icon(info.icon, 72);
+  document.getElementById('heroIconSmall').innerHTML = icon(info.icon, 18);
+  document.getElementById('weatherDesc').textContent = info.d+' · ';
   document.getElementById('feelsLike').textContent = 'Voelt als '+Math.round(cur.apparent_temperature)+'°';
   document.getElementById('shareLabel').textContent = vakantieMode ? 'Stuur een kaartje 🌺' : 'Delen';
 
