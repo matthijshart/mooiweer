@@ -106,8 +106,15 @@
     .compare-note { font-size: 10px; color: #cbd5e1; font-style: italic; margin-top: 8px; }
 
     /* Counter */
-    .counter { font-size: 12px; color: #cbd5e1; margin-top: 16px; padding-bottom: 24px; }
-    .counter span { color: #64748b; font-weight: 600; }
+    .counter { margin-top: 20px; padding: 14px 16px; padding-bottom: 28px; background: #f8fafc; border-radius: 16px; display: flex; align-items: center; gap: 12px; }
+    body.vakantie .counter { background: #fff7ed; }
+    .counter-icon { font-size: 22px; flex-shrink: 0; }
+    .counter-text { flex: 1; }
+    .counter-num { font-size: 20px; font-weight: 700; color: #1e3a5f; letter-spacing: -0.5px; line-height: 1; }
+    body.vakantie .counter-num { color: #ea580c; }
+    .counter-label { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+    .counter-badge { font-size: 11px; font-weight: 600; color: #3b82f6; background: #dbeafe; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+    body.vakantie .counter-badge { color: #f97316; background: #ffedd5; }
 
     /* Footer */
     footer { border-top: 1px solid #f1f5f9; }
@@ -473,10 +480,13 @@ function startCounter(){
   const doy=Math.floor((today-new Date(today.getFullYear(),0,0))/86400000);
   let count=8000+(doy*347)%7000+today.getHours()*412+Math.floor(today.getMinutes()*6.8);
   const el=document.getElementById('counterEl');
-  el.innerHTML=`Vandaag al <span>${count.toLocaleString('nl-NL')}</span> mensen blij gemaakt · 97% had beter weer dan verwacht`;
+  function renderCounter(){
+    el.innerHTML=`<span class="counter-icon">😊</span><div class="counter-text"><div class="counter-num">${count.toLocaleString('nl-NL')} mensen</div><div class="counter-label">vandaag blij gemaakt met mooier weer</div></div><span class="counter-badge">97% positief</span>`;
+  }
+  renderCounter();
   counterInterval=setInterval(()=>{
     count+=Math.floor(Math.random()*3)+1;
-    el.innerHTML=`Vandaag al <span>${count.toLocaleString('nl-NL')}</span> mensen blij gemaakt · 97% had beter weer dan verwacht`;
+    renderCounter();
   }, 3500+Math.random()*2000);
 }
 
